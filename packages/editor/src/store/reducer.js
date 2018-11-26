@@ -302,7 +302,9 @@ const withBlockReset = ( reducer ) => ( state, action ) => {
 
 /**
  * Higher-order reducer which targets the combined blocks reducer and handles
- * the `SAVE_REUSABLE_BLOCK_SUCCESS` action.
+ * the `SAVE_REUSABLE_BLOCK_SUCCESS` action. This action can't be handled by
+ * regular reducers and needs a higher-order reducer since it needs access to
+ * both `byClientId` and `attributesByClientId` simultaneously.
  *
  * @param {Function} reducer Original reducer function.
  *
@@ -320,11 +322,10 @@ const withSaveReusableBlock = ( reducer ) => ( state, action ) => {
 		}
 
 		newState = { ...state };
-		newState.byClientId = {};
 		newState.attributesByClientId = {};
 
 		Object.keys( state.byClientId ).forEach( ( blockId ) => {
-			const block = { ...state.byClientId[ blockId ] };
+			const block = newState.byClientId[ blockId ];
 			let attributes = { ...state.attributesByClientId[ blockId ] };
 
 			if ( block.name === 'core/block' && attributes && attributes.ref === id ) {
@@ -334,7 +335,6 @@ const withSaveReusableBlock = ( reducer ) => ( state, action ) => {
 				};
 			}
 
-			newState.byClientId[ blockId ] = block;
 			newState.attributesByClientId[ blockId ] = attributes;
 		} );
 	}
