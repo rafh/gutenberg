@@ -112,6 +112,33 @@ function getFlattenedBlocks( blocks ) {
 	return flattenedBlocks;
 }
 
+function getFlattenedBlocksWithoutAttributes( blocks ) {
+	const flattenedBlocks = getFlattenedBlocks( blocks );
+
+	return Object.keys( flattenedBlocks ).reduce( ( result, blockId ) => ( {
+		...result,
+		[ blockId ]: omit( flattenedBlocks[ blockId ], 'attributes' ),
+	} ), {} );
+}
+
+/**
+ * Given an array of blocks, returns an object containing all block attributes,
+ * recursing into inner blocks. Keys correspond to the block client ID, the
+ * value of which is the attributes object.
+ *
+ * @param {Array} blocks Blocks to flatten.
+ *
+ * @return {Object} Flattened block attributes object.
+ */
+function getFlattenedBlockAttributes( blocks ) {
+	const flattenedBlocks = getFlattenedBlocks( blocks );
+
+	return Object.keys( flattenedBlocks ).reduce( ( result, blockId ) => ( {
+		...result,
+		[ blockId ]: { attributes: flattenedBlocks[ blockId ].attributes },
+	} ), {} );
+}
+
 /**
  * Given a block order map object, returns *all* of the block client IDs that are
  * a descendant of the given root client ID.
@@ -261,7 +288,11 @@ const withBlockReset = ( reducer ) => ( state, action ) => {
 			...state,
 			byClientId: {
 				...omit( state.byClientId, visibleClientIds ),
-				...getFlattenedBlocks( action.blocks ),
+				...getFlattenedBlocksWithoutAttributes( action.blocks ),
+			},
+			attributesByClientId: {
+				...omit( state.byClientId, visibleClientIds ),
+				...getFlattenedBlockAttributes( action.blocks ),
 			},
 			order: {
 				...omit( state.order, visibleClientIds ),
@@ -271,6 +302,48 @@ const withBlockReset = ( reducer ) => ( state, action ) => {
 	}
 
 	return reducer( state, action );
+};
+
+/**
+ * Higher-order reducer which targets the combined blocks reducer and handles
+ * the `SAVE_REUSABLE_BLOCK_SUCCESS` action.
+ *
+ * @param {Function} reducer Original reducer function.
+ *
+ * @return {Function} Enhanced reducer function.
+ */
+const withSaveReusableBlock = ( reducer ) => ( state, action ) => {
+	let newState = state;
+
+	if ( state && action.type === 'SAVE_REUSABLE_BLOCK_SUCCESS' ) {
+		const { id, updatedId } = action;
+
+		// If a temporary reusable block is saved, we swap the temporary id with the final one
+		if ( id === updatedId ) {
+			return state;
+		}
+
+		newState = { ...state };
+		newState.byClientId = {};
+		newState.attributesByClientId = {};
+
+		Object.keys( state.byClientId ).forEach( ( blockId ) => {
+			const block = { ...state.byClientId[ blockId ] };
+			const attributes = { ...state.attributesByClientId[ blockId ] };
+
+			newState.byClientId[ blockId ] = block;
+			newState.attributesByClientId[ blockId ] = attributes;
+
+			if ( block.name === 'core/block' && attributes && attributes.attributes.ref === id ) {
+				attributes.attributes = {
+					...attributes.attributes,
+					ref: updatedId,
+				};
+			}
+		} );
+	}
+
+	return reducer( newState, action );
 };
 
 /**
@@ -351,6 +424,8 @@ export const editor = flow( [
 
 		withBlockReset,
 
+		withSaveReusableBlock,
+
 		// Track whether changes exist, resetting at each post save. Relies on
 		// editor initialization firing post reset as an effect.
 		withChangeDetection( {
@@ -361,12 +436,74 @@ export const editor = flow( [
 		byClientId( state = {}, action ) {
 			switch ( action.type ) {
 				case 'SETUP_EDITOR_STATE':
-					return getFlattenedBlocks( action.blocks );
+					return getFlattenedBlocksWithoutAttributes( action.blocks );
 
 				case 'RECEIVE_BLOCKS':
 					return {
 						...state,
-						...getFlattenedBlocks( action.blocks ),
+						...getFlattenedBlocksWithoutAttributes( action.blocks ),
+					};
+
+				case 'UPDATE_BLOCK':
+					// Ignore updates if block isn't known
+					if ( ! state[ action.clientId ] ) {
+						return state;
+					}
+
+					return {
+						...state,
+						[ action.clientId ]: {
+							...state[ action.clientId ],
+							...omit( action.updates, 'attributes' ),
+						},
+					};
+
+				case 'INSERT_BLOCKS':
+					return {
+						...state,
+						...getFlattenedBlocksWithoutAttributes( action.blocks ),
+					};
+
+				case 'REPLACE_BLOCKS':
+					if ( ! action.blocks ) {
+						return state;
+					}
+
+					return {
+						...omit( state, action.clientIds ),
+						...getFlattenedBlocksWithoutAttributes( action.blocks ),
+					};
+
+				case 'REMOVE_BLOCKS':
+					return omit( state, action.clientIds );
+			}
+
+			return state;
+		},
+
+		attributesByClientId( state = {}, action ) {
+			switch ( action.type ) {
+				case 'SETUP_EDITOR_STATE':
+					return getFlattenedBlockAttributes( action.blocks );
+
+				case 'RECEIVE_BLOCKS':
+					return {
+						...state,
+						...getFlattenedBlockAttributes( action.blocks ),
+					};
+
+				case 'UPDATE_BLOCK':
+					// Ignore updates if block isn't known
+					if ( ! state[ action.clientId ] ) {
+						return state;
+					}
+
+					return {
+						...state,
+						[ action.clientId ]: {
+							...state[ action.clientId ],
+							attributes: { ...action.updates.attributes },
+						},
 					};
 
 				case 'UPDATE_BLOCK_ATTRIBUTES':
@@ -391,33 +528,18 @@ export const editor = flow( [
 						return state;
 					}
 
-					// Otherwise merge attributes into state
+					// Otherwise replace attributes in state
 					return {
 						...state,
 						[ action.clientId ]: {
-							...state[ action.clientId ],
 							attributes: nextAttributes,
-						},
-					};
-
-				case 'UPDATE_BLOCK':
-					// Ignore updates if block isn't known
-					if ( ! state[ action.clientId ] ) {
-						return state;
-					}
-
-					return {
-						...state,
-						[ action.clientId ]: {
-							...state[ action.clientId ],
-							...action.updates,
 						},
 					};
 
 				case 'INSERT_BLOCKS':
 					return {
 						...state,
-						...getFlattenedBlocks( action.blocks ),
+						...getFlattenedBlockAttributes( action.blocks ),
 					};
 
 				case 'REPLACE_BLOCKS':
@@ -427,34 +549,11 @@ export const editor = flow( [
 
 					return {
 						...omit( state, action.clientIds ),
-						...getFlattenedBlocks( action.blocks ),
+						...getFlattenedBlockAttributes( action.blocks ),
 					};
 
 				case 'REMOVE_BLOCKS':
 					return omit( state, action.clientIds );
-
-				case 'SAVE_REUSABLE_BLOCK_SUCCESS': {
-					const { id, updatedId } = action;
-
-					// If a temporary reusable block is saved, we swap the temporary id with the final one
-					if ( id === updatedId ) {
-						return state;
-					}
-
-					return mapValues( state, ( block ) => {
-						if ( block.name === 'core/block' && block.attributes.ref === id ) {
-							return {
-								...block,
-								attributes: {
-									...block.attributes,
-									ref: updatedId,
-								},
-							};
-						}
-
-						return block;
-					} );
-				}
 			}
 
 			return state;

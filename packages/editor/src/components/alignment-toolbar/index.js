@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { find } from 'lodash';
+import memize from 'memize';
 
 /**
  * WordPress dependencies
@@ -61,12 +62,10 @@ export function AlignmentToolbar( { isCollapsed, value, onChange, alignmentContr
 	);
 }
 
+const getClientIdOnly = memize( ( clientId ) => ( { clientId } ) );
+
 export default compose(
-	withBlockEditContext( ( { clientId } ) => {
-		return {
-			clientId,
-		};
-	} ),
+	withBlockEditContext( ( { clientId } ) => getClientIdOnly( clientId ) ),
 	withViewportMatch( { isLargeViewport: 'medium' } ),
 	withSelect( ( select, { clientId, isLargeViewport, isCollapsed } ) => {
 		const { getBlockRootClientId, getEditorSettings } = select( 'core/editor' );

@@ -4,6 +4,7 @@
 import {
 	castArray,
 	flatMap,
+	flatten,
 	find,
 	first,
 	get,
@@ -439,7 +440,7 @@ export function isEditedPostSaveable( state ) {
  * @return {boolean} Whether post has content.
  */
 export function isEditedPostEmpty( state ) {
-	const blocks = getBlocksForSerialization( state );
+	const blocks = getBlocksForSerializationWithoutAttributes( state );
 
 	// While the condition of truthy content string is sufficient to determine
 	// emptiness, testing saveable blocks length is a trivial operation. Since
@@ -586,6 +587,28 @@ export const getBlockDependantsCacheBust = createSelector(
 );
 
 /**
+ * Returns a new reference when the inner blocks of a given block client ID
+ * change. This is used exclusively as a memoized selector dependant, relying
+ * on this selector's shared return value and recursively those of its inner
+ * blocks defined as dependencies. This abuses mechanics of the selector
+ * memoization to return from the original selector function only when
+ * dependants change.
+ *
+ * @param {Object} state    Editor state.
+ * @param {string} clientId Block client ID.
+ *
+ * @return {*} A value whose reference will change only when inner blocks of
+ *             the given block client ID change.
+ */
+export const getBlockDependantsCacheBustWithoutAttributes = createSelector(
+	() => [],
+	( state, clientId ) => map(
+		getBlockOrder( state, clientId ),
+		( innerBlockClientId ) => getBlockWithoutAttributes( state, innerBlockClientId ),
+	),
+);
+
+/**
  * Returns a block's name given its client ID, or null if no block exists with
  * the client ID.
  *
@@ -630,7 +653,7 @@ export const getBlock = createSelector(
 			return null;
 		}
 
-		let { attributes } = block;
+		let { attributes } = state.editor.present.blocks.attributesByClientId[ clientId ];
 
 		// Inject custom source attribute values.
 		//
@@ -659,7 +682,42 @@ export const getBlock = createSelector(
 	},
 	( state, clientId ) => [
 		state.editor.present.blocks.byClientId[ clientId ],
+		state.editor.present.blocks.attributesByClientId[ clientId ],
 		getBlockDependantsCacheBust( state, clientId ),
+		state.editor.present.blocks.order,
+		state.editor.present.edits.meta,
+		state.initialEdits.meta,
+		state.currentPost.meta,
+	]
+);
+
+/**
+ * Returns a block given its client ID. This is a parsed copy of the block,
+ * containing its `blockName` and `clientId`. This
+ * is not the block's registration settings, which must be retrieved from the
+ * blocks module registration store.
+ *
+ * @param {Object} state    Editor state.
+ * @param {string} clientId Block client ID.
+ *
+ * @return {Object} Parsed block object.
+ */
+export const getBlockWithoutAttributes = createSelector(
+	( state, clientId ) => {
+		const block = state.editor.present.blocks.byClientId[ clientId ];
+		if ( ! block ) {
+			return null;
+		}
+
+		return {
+			...block,
+			innerBlocks: getBlocksWithoutAttributes( state, clientId ),
+		};
+	},
+	( state, clientId ) => [
+		state.editor.present.blocks.byClientId[ clientId ],
+		getBlockDependantsCacheBustWithoutAttributes( state, clientId ),
+		state.editor.present.blocks.order,
 		state.editor.present.edits.meta,
 		state.initialEdits.meta,
 		state.currentPost.meta,
@@ -691,8 +749,42 @@ export const getBlocks = createSelector(
 			( clientId ) => getBlock( state, clientId )
 		);
 	},
+	( state, rootClientId ) => {
+		if ( ! rootClientId ) {
+			return [
+				state.editor.present.blocks,
+			];
+		}
+		return [
+			state.editor.present.blocks.order,
+			state.editor.present.blocks.byClientId[ rootClientId ],
+			state.editor.present.blocks.attributesByClientId[ rootClientId ],
+		];
+	}
+);
+
+/**
+ * Returns all block objects for the current post being edited as an array in
+ * the order they appear in the post. Does not include attributes.
+ *
+ * Note: It's important to memoize this selector to avoid return a new instance
+ * on each call
+ *
+ * @param {Object}  state        Editor state.
+ * @param {?String} rootClientId Optional root client ID of block list.
+ *
+ * @return {Object[]} Post blocks.
+ */
+export const getBlocksWithoutAttributes = createSelector(
+	( state, rootClientId ) => {
+		return map(
+			getBlockOrder( state, rootClientId ),
+			( clientId ) => getBlockWithoutAttributes( state, clientId )
+		);
+	},
 	( state ) => [
-		state.editor.present.blocks,
+		state.editor.present.blocks.byClientId,
+		state.editor.present.blocks.order,
 	]
 );
 
@@ -754,6 +846,11 @@ export const getGlobalBlockCount = createSelector(
 	]
 );
 
+const mapClientIds = ( clientIds, fn ) => map(
+	castArray( clientIds ),
+	( clientId ) => fn( clientId )
+);
+
 /**
  * Given an array of block client IDs, returns the corresponding array of block
  * objects.
@@ -764,15 +861,31 @@ export const getGlobalBlockCount = createSelector(
  * @return {WPBlock[]} Block objects.
  */
 export const getBlocksByClientId = createSelector(
-	( state, clientIds ) => map(
-		castArray( clientIds ),
-		( clientId ) => getBlock( state, clientId )
-	),
-	( state ) => [
+	( state, clientIds ) => mapClientIds( clientIds, ( clientId ) => getBlock( state, clientId ) ),
+	( state, clientIds ) => [
 		state.editor.present.edits.meta,
 		state.initialEdits.meta,
 		state.currentPost.meta,
-		state.editor.present.blocks,
+		...mapClientIds( clientIds, ( clientId ) => getBlock( state, clientId ) ),
+	]
+);
+
+/**
+ * Given an array of block client IDs, returns the corresponding array of block
+ * objects.
+ *
+ * @param {Object}   state     Editor state.
+ * @param {string[]} clientIds Client IDs for which blocks are to be returned.
+ *
+ * @return {WPBlock[]} Block objects.
+ */
+export const getBlocksByClientIdWithoutAttributes = createSelector(
+	( state, clientIds ) => mapClientIds( clientIds, ( clientId ) => getBlockWithoutAttributes( state, clientId ) ),
+	( state, clientIds ) => [
+		state.editor.present.edits.meta,
+		state.initialEdits.meta,
+		state.currentPost.meta,
+		...mapClientIds( clientIds, ( clientId ) => getBlockWithoutAttributes( state, clientId ) ),
 	]
 );
 
@@ -1069,6 +1182,15 @@ export const getMultiSelectedBlockClientIds = createSelector(
 	],
 );
 
+const mapMultiSelectedBlockClientIds = ( state, fn ) => {
+	const multiSelectedBlockClientIds = getMultiSelectedBlockClientIds( state );
+	if ( ! multiSelectedBlockClientIds.length ) {
+		return EMPTY_ARRAY;
+	}
+
+	return multiSelectedBlockClientIds.map( ( clientId ) => fn( clientId ) );
+};
+
 /**
  * Returns the current multi-selection set of blocks, or an empty array if
  * there is no multi-selection.
@@ -1079,18 +1201,11 @@ export const getMultiSelectedBlockClientIds = createSelector(
  */
 export const getMultiSelectedBlocks = createSelector(
 	( state ) => {
-		const multiSelectedBlockClientIds = getMultiSelectedBlockClientIds( state );
-		if ( ! multiSelectedBlockClientIds.length ) {
-			return EMPTY_ARRAY;
-		}
-
-		return multiSelectedBlockClientIds.map( ( clientId ) => getBlock( state, clientId ) );
+		return mapMultiSelectedBlockClientIds( state, ( clientId ) => getBlock( state, clientId ) );
 	},
 	( state ) => [
-		state.editor.present.blocks.order,
-		state.blockSelection.start,
-		state.blockSelection.end,
-		state.editor.present.blocks.byClientId,
+		...getMultiSelectedBlockClientIds.getDependants( state ),
+		...flatten( mapMultiSelectedBlockClientIds( state, ( clientId ) => getBlock.getDependants( state, clientId ) ) ),
 		state.editor.present.edits.meta,
 		state.initialEdits.meta,
 		state.currentPost.meta,
@@ -1140,7 +1255,7 @@ const isAncestorOf = createSelector(
 		return possibleAncestorId === idToCheck;
 	},
 	( state ) => [
-		state.editor.present.blocks,
+		state.editor.present.blocks.order,
 	],
 );
 
@@ -1628,6 +1743,32 @@ export function getBlocksForSerialization( state ) {
 }
 
 /**
+ * Returns a set of blocks which are to be used in consideration of the post's
+ * generated save content. Does not include attributes.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {WPBlock[]} Filtered set of blocks for save.
+ */
+export function getBlocksForSerializationWithoutAttributes( state ) {
+	const blocksWithoutAttributes = getBlocksWithoutAttributes( state );
+
+	// A single unmodified default block is assumed to be equivalent to an
+	// empty post.
+	let isSingleUnmodifiedDefaultBlock;
+	if ( blocksWithoutAttributes.length === 1 ) {
+		const blocks = getBlocks( state );
+		isSingleUnmodifiedDefaultBlock = isUnmodifiedDefaultBlock( blocks[ 0 ] );
+	}
+
+	if ( isSingleUnmodifiedDefaultBlock ) {
+		return [];
+	}
+
+	return blocksWithoutAttributes;
+}
+
+/**
  * Returns the content of the post being edited, preferring raw string edit
  * before falling back to serialization of block state.
  *
@@ -1886,7 +2027,7 @@ export const getInserterItems = createSelector(
 
 			let isDisabled = false;
 			if ( ! hasBlockSupport( blockType.name, 'multiple', true ) ) {
-				isDisabled = some( getBlocksByClientId( state, getClientIdsWithDescendants( state ) ), { name: blockType.name } );
+				isDisabled = some( getBlocksByClientIdWithoutAttributes( state, getClientIdsWithDescendants( state ) ), { name: blockType.name } );
 			}
 
 			const isContextual = isArray( blockType.parent );
@@ -1947,7 +2088,7 @@ export const getInserterItems = createSelector(
 	},
 	( state, rootClientId ) => [
 		state.blockListSettings[ rootClientId ],
-		state.editor.present.blocks,
+		state.editor.present.blocks.byClientId,
 		state.preferences.insertUsage,
 		state.settings.allowedBlockTypes,
 		state.settings.templateLock,
@@ -1981,7 +2122,7 @@ export const hasInserterItems = createSelector(
 	},
 	( state, rootClientId ) => [
 		state.blockListSettings[ rootClientId ],
-		state.editor.present.blocks,
+		state.editor.present.blocks.byClientId,
 		state.settings.allowedBlockTypes,
 		state.settings.templateLock,
 		state.reusableBlocks.data,

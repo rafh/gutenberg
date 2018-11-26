@@ -489,8 +489,11 @@ describe( 'state', () => {
 			expect( state.present.blocks.byClientId.chicken ).toEqual( {
 				clientId: 'chicken',
 				name: 'core/test-block',
-				attributes: { content: 'ribs' },
 				isValid: true,
+			} );
+
+			expect( state.present.blocks.attributesByClientId.chicken ).toEqual( {
+				attributes: { content: 'ribs' },
 			} );
 		} );
 
@@ -517,10 +520,13 @@ describe( 'state', () => {
 			expect( state.present.blocks.byClientId.chicken ).toEqual( {
 				clientId: 'chicken',
 				name: 'core/block',
+				isValid: false,
+			} );
+
+			expect( state.present.blocks.attributesByClientId.chicken ).toEqual( {
 				attributes: {
 					ref: 3,
 				},
-				isValid: false,
 			} );
 		} );
 
@@ -790,6 +796,10 @@ describe( 'state', () => {
 				ribs: {
 					clientId: 'ribs',
 					name: 'core/test-block',
+				},
+			} );
+			expect( state.present.blocks.attributesByClientId ).toEqual( {
+				ribs: {
 					attributes: {},
 				},
 			} );
@@ -827,6 +837,10 @@ describe( 'state', () => {
 				ribs: {
 					clientId: 'ribs',
 					name: 'core/test-block',
+				},
+			} );
+			expect( state.present.blocks.attributesByClientId ).toEqual( {
+				ribs: {
 					attributes: {},
 				},
 			} );
@@ -1211,51 +1225,6 @@ describe( 'state', () => {
 			} );
 
 			describe( 'byClientId', () => {
-				it( 'should return with attribute block updates', () => {
-					const original = deepFreeze( editor( undefined, {
-						type: 'RESET_BLOCKS',
-						blocks: [ {
-							clientId: 'kumquat',
-							attributes: {},
-							innerBlocks: [],
-						} ],
-					} ) );
-					const state = editor( original, {
-						type: 'UPDATE_BLOCK_ATTRIBUTES',
-						clientId: 'kumquat',
-						attributes: {
-							updated: true,
-						},
-					} );
-
-					expect( state.present.blocks.byClientId.kumquat.attributes.updated ).toBe( true );
-				} );
-
-				it( 'should accumulate attribute block updates', () => {
-					const original = deepFreeze( editor( undefined, {
-						type: 'RESET_BLOCKS',
-						blocks: [ {
-							clientId: 'kumquat',
-							attributes: {
-								updated: true,
-							},
-							innerBlocks: [],
-						} ],
-					} ) );
-					const state = editor( original, {
-						type: 'UPDATE_BLOCK_ATTRIBUTES',
-						clientId: 'kumquat',
-						attributes: {
-							moreUpdated: true,
-						},
-					} );
-
-					expect( state.present.blocks.byClientId.kumquat.attributes ).toEqual( {
-						updated: true,
-						moreUpdated: true,
-					} );
-				} );
-
 				it( 'should ignore updates to non-existent block', () => {
 					const original = deepFreeze( editor( undefined, {
 						type: 'RESET_BLOCKS',
@@ -1292,6 +1261,91 @@ describe( 'state', () => {
 					} );
 
 					expect( state.present.blocks.byClientId ).toBe( state.present.blocks.byClientId );
+				} );
+			} );
+
+			describe( 'attributesByClientId', () => {
+				it( 'should return with attribute block updates', () => {
+					const original = deepFreeze( editor( undefined, {
+						type: 'RESET_BLOCKS',
+						blocks: [ {
+							clientId: 'kumquat',
+							attributes: {},
+							innerBlocks: [],
+						} ],
+					} ) );
+					const state = editor( original, {
+						type: 'UPDATE_BLOCK_ATTRIBUTES',
+						clientId: 'kumquat',
+						attributes: {
+							updated: true,
+						},
+					} );
+
+					expect( state.present.blocks.attributesByClientId.kumquat.attributes.updated ).toBe( true );
+				} );
+
+				it( 'should accumulate attribute block updates', () => {
+					const original = deepFreeze( editor( undefined, {
+						type: 'RESET_BLOCKS',
+						blocks: [ {
+							clientId: 'kumquat',
+							attributes: {
+								updated: true,
+							},
+							innerBlocks: [],
+						} ],
+					} ) );
+					const state = editor( original, {
+						type: 'UPDATE_BLOCK_ATTRIBUTES',
+						clientId: 'kumquat',
+						attributes: {
+							moreUpdated: true,
+						},
+					} );
+
+					expect( state.present.blocks.attributesByClientId.kumquat.attributes ).toEqual( {
+						updated: true,
+						moreUpdated: true,
+					} );
+				} );
+
+				it( 'should ignore updates to non-existent block', () => {
+					const original = deepFreeze( editor( undefined, {
+						type: 'RESET_BLOCKS',
+						blocks: [],
+					} ) );
+					const state = editor( original, {
+						type: 'UPDATE_BLOCK_ATTRIBUTES',
+						clientId: 'kumquat',
+						attributes: {
+							updated: true,
+						},
+					} );
+
+					expect( state.present.blocks.attributesByClientId ).toBe( original.present.blocks.attributesByClientId );
+				} );
+
+				it( 'should return with same reference if no changes in updates', () => {
+					const original = deepFreeze( editor( undefined, {
+						type: 'RESET_BLOCKS',
+						blocks: [ {
+							clientId: 'kumquat',
+							attributes: {
+								updated: true,
+							},
+							innerBlocks: [],
+						} ],
+					} ) );
+					const state = editor( original, {
+						type: 'UPDATE_BLOCK_ATTRIBUTES',
+						clientId: 'kumquat',
+						attributes: {
+							updated: true,
+						},
+					} );
+
+					expect( state.present.blocks.attributesByClientId ).toBe( state.present.blocks.attributesByClientId );
 				} );
 			} );
 		} );
