@@ -493,7 +493,7 @@ describe( 'state', () => {
 			} );
 
 			expect( state.present.blocks.attributesByClientId.chicken ).toEqual( {
-				attributes: { content: 'ribs' },
+				content: 'ribs',
 			} );
 		} );
 
@@ -524,9 +524,7 @@ describe( 'state', () => {
 			} );
 
 			expect( state.present.blocks.attributesByClientId.chicken ).toEqual( {
-				attributes: {
-					ref: 3,
-				},
+				ref: 3,
 			} );
 		} );
 
@@ -799,9 +797,7 @@ describe( 'state', () => {
 				},
 			} );
 			expect( state.present.blocks.attributesByClientId ).toEqual( {
-				ribs: {
-					attributes: {},
-				},
+				ribs: {},
 			} );
 		} );
 
@@ -840,9 +836,7 @@ describe( 'state', () => {
 				},
 			} );
 			expect( state.present.blocks.attributesByClientId ).toEqual( {
-				ribs: {
-					attributes: {},
-				},
+				ribs: {},
 			} );
 		} );
 
@@ -1282,7 +1276,7 @@ describe( 'state', () => {
 						},
 					} );
 
-					expect( state.present.blocks.attributesByClientId.kumquat.attributes.updated ).toBe( true );
+					expect( state.present.blocks.attributesByClientId.kumquat.updated ).toBe( true );
 				} );
 
 				it( 'should accumulate attribute block updates', () => {
@@ -1304,7 +1298,7 @@ describe( 'state', () => {
 						},
 					} );
 
-					expect( state.present.blocks.attributesByClientId.kumquat.attributes ).toEqual( {
+					expect( state.present.blocks.attributesByClientId.kumquat ).toEqual( {
 						updated: true,
 						moreUpdated: true,
 					} );

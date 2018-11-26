@@ -1220,9 +1220,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										text: '',
-									},
+									text: '',
 								},
 							},
 							order: {
@@ -1253,9 +1251,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										content: '',
-									},
+									content: '',
 								},
 							},
 							order: {
@@ -1287,9 +1283,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										content: '',
-									},
+									content: '',
 								},
 							},
 							order: {
@@ -1517,9 +1511,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										text: '',
-									},
+									text: '',
 								},
 							},
 							order: {
@@ -1550,9 +1542,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										text: '',
-									},
+									text: '',
 								},
 							},
 							order: {
@@ -1629,9 +1619,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										content: '',
-									},
+									content: '',
 								},
 							},
 							order: {
@@ -1662,9 +1650,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										content: '',
-									},
+									content: '',
 								},
 							},
 							order: {
@@ -1697,9 +1683,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										content: 'Test Data',
-									},
+									content: 'Test Data',
 								},
 							},
 							order: {
@@ -1737,14 +1721,10 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: {
-									attributes: {
-										content: '',
-									},
+									content: '',
 								},
 								456: {
-									attributes: {
-										content: '',
-									},
+									content: '',
 								},
 							},
 							order: {
@@ -1888,7 +1868,7 @@ describe( 'selectors', () => {
 
 	describe( 'getBlockDependantsCacheBust', () => {
 		const rootBlock = { clientId: 123, name: 'core/paragraph' };
-		const rootBlockAttributes = { attributes: {} };
+		const rootBlockAttributes = {};
 		const rootOrder = [ 123 ];
 
 		it( 'returns an unchanging reference', () => {
@@ -1977,7 +1957,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: rootBlockAttributes,
-								456: { attributes: {} },
+								456: {},
 							},
 							order: {
 								'': rootOrder,
@@ -1999,7 +1979,7 @@ describe( 'selectors', () => {
 		it( 'returns an unchanging reference on unchanging inner block', () => {
 			const rootBlockOrder = [ 456 ];
 			const childBlock = { clientId: 456, name: 'core/paragraph' };
-			const childBlockAttributes = { attributes: {} };
+			const childBlockAttributes = {};
 			const childBlockOrder = [];
 
 			const state = {
@@ -2072,7 +2052,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: rootBlockAttributes,
-								456: { attributes: {} },
+								456: {},
 							},
 							order: {
 								'': rootOrder,
@@ -2097,7 +2077,7 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								123: rootBlockAttributes,
-								456: { attributes: { content: [ 'foo' ] } },
+								456: { content: [ 'foo' ] },
 							},
 							order: {
 								'': rootOrder,
@@ -2119,7 +2099,7 @@ describe( 'selectors', () => {
 		it( 'returns a new reference on updated grandchild inner block', () => {
 			const rootBlockOrder = [ 456 ];
 			const childBlock = { clientId: 456, name: 'core/paragraph' };
-			const childBlockAttributes = { attributes: {} };
+			const childBlockAttributes = {};
 			const childBlockOrder = [ 789 ];
 			const grandChildBlockOrder = [];
 
@@ -2136,7 +2116,7 @@ describe( 'selectors', () => {
 							attributesByClientId: {
 								123: rootBlockAttributes,
 								456: childBlockAttributes,
-								789: { attributes: {} },
+								789: {},
 							},
 							order: {
 								'': rootOrder,
@@ -2164,7 +2144,7 @@ describe( 'selectors', () => {
 							attributesByClientId: {
 								123: rootBlockAttributes,
 								456: childBlockAttributes,
-								789: { attributes: { content: [ 'foo' ] } },
+								789: { content: [ 'foo' ] },
 							},
 							order: {
 								'': rootOrder,
@@ -2220,9 +2200,7 @@ describe( 'selectors', () => {
 								},
 							},
 							attributesByClientId: {
-								'afd1cb17-2c08-4e7a-91be-007ba7ddc3a1': {
-									attributes: {},
-								},
+								'afd1cb17-2c08-4e7a-91be-007ba7ddc3a1': {},
 							},
 							order: {
 								'': [ 'afd1cb17-2c08-4e7a-91be-007ba7ddc3a1' ],
@@ -2252,7 +2230,7 @@ describe( 'selectors', () => {
 								123: { clientId: 123, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								123: { attributes: {} },
+								123: {},
 							},
 							order: {
 								'': [ 123 ],
@@ -2303,8 +2281,8 @@ describe( 'selectors', () => {
 								456: { clientId: 456, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								123: { attributes: {} },
-								456: { attributes: {} },
+								123: {},
+								456: {},
 							},
 							order: {
 								'': [ 123 ],
@@ -2358,7 +2336,7 @@ describe( 'selectors', () => {
 								123: { clientId: 123, name: 'core/meta-block' },
 							},
 							attributesByClientId: {
-								123: { attributes: {} },
+								123: {},
 							},
 							order: {
 								'': [ 123 ],
@@ -2396,8 +2374,8 @@ describe( 'selectors', () => {
 								123: { clientId: 123, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								23: { attributes: {} },
-								123: { attributes: {} },
+								23: {},
+								123: {},
 							},
 							order: {
 								'': [ 123, 23 ],
@@ -2441,21 +2419,21 @@ describe( 'selectors', () => {
 								'uuid-30': { clientId: 'uuid-30', name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								'uuid-2': { attributes: {} },
-								'uuid-4': { attributes: {} },
-								'uuid-6': { attributes: {} },
-								'uuid-8': { attributes: {} },
-								'uuid-10': { attributes: {} },
-								'uuid-12': { attributes: {} },
-								'uuid-14': { attributes: {} },
-								'uuid-16': { attributes: {} },
-								'uuid-18': { attributes: {} },
-								'uuid-20': { attributes: {} },
-								'uuid-22': { attributes: {} },
-								'uuid-24': { attributes: {} },
-								'uuid-26': { attributes: {} },
-								'uuid-28': { attributes: {} },
-								'uuid-30': { attributes: {} },
+								'uuid-2': {},
+								'uuid-4': {},
+								'uuid-6': {},
+								'uuid-8': {},
+								'uuid-10': {},
+								'uuid-12': {},
+								'uuid-14': {},
+								'uuid-16': {},
+								'uuid-18': {},
+								'uuid-20': {},
+								'uuid-22': {},
+								'uuid-24': {},
+								'uuid-26': {},
+								'uuid-28': {},
+								'uuid-30': {},
 							},
 							order: {
 								'': [ 'uuid-6', 'uuid-8', 'uuid-10', 'uuid-22' ],
@@ -2518,21 +2496,21 @@ describe( 'selectors', () => {
 								'uuid-30': { clientId: 'uuid-30', name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								'uuid-2': { attributes: {} },
-								'uuid-4': { attributes: {} },
-								'uuid-6': { attributes: {} },
-								'uuid-8': { attributes: {} },
-								'uuid-10': { attributes: {} },
-								'uuid-12': { attributes: {} },
-								'uuid-14': { attributes: {} },
-								'uuid-16': { attributes: {} },
-								'uuid-18': { attributes: {} },
-								'uuid-20': { attributes: {} },
-								'uuid-22': { attributes: {} },
-								'uuid-24': { attributes: {} },
-								'uuid-26': { attributes: {} },
-								'uuid-28': { attributes: {} },
-								'uuid-30': { attributes: {} },
+								'uuid-2': {},
+								'uuid-4': {},
+								'uuid-6': {},
+								'uuid-8': {},
+								'uuid-10': {},
+								'uuid-12': {},
+								'uuid-14': {},
+								'uuid-16': {},
+								'uuid-18': {},
+								'uuid-20': {},
+								'uuid-22': {},
+								'uuid-24': {},
+								'uuid-26': {},
+								'uuid-28': {},
+								'uuid-30': {},
 							},
 							order: {
 								'': [ 'uuid-6', 'uuid-8', 'uuid-10', 'uuid-22' ],
@@ -2585,8 +2563,8 @@ describe( 'selectors', () => {
 								123: { clientId: 123, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								23: { attributes: {} },
-								123: { attributes: {} },
+								23: {},
+								123: {},
 							},
 							order: {
 								'': [ 123, 23 ],
@@ -2610,9 +2588,9 @@ describe( 'selectors', () => {
 								789: { clientId: 789, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								123: { attributes: {} },
-								456: { attributes: {} },
-								789: { attributes: {} },
+								123: {},
+								456: {},
+								789: {},
 							},
 							order: {
 								'': [ 123 ],
@@ -2673,9 +2651,9 @@ describe( 'selectors', () => {
 							789: { clientId: 789, name: 'core/paragraph' },
 						},
 						attributesByClientId: {
-							123: { attributes: {} },
-							456: { attributes: {} },
-							789: { attributes: {} },
+							123: {},
+							456: {},
+							789: {},
 						},
 						order: {
 							'': [ 123, 456 ],
@@ -2749,8 +2727,8 @@ describe( 'selectors', () => {
 								123: { clientId: 123, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								23: { attributes: {} },
-								123: { attributes: {} },
+								23: {},
+								123: {},
 							},
 							order: {
 								'': [ 23, 123 ],
@@ -2779,8 +2757,8 @@ describe( 'selectors', () => {
 								123: { clientId: 123, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								23: { attributes: {} },
-								123: { attributes: {} },
+								23: {},
+								123: {},
 							},
 							order: {
 								'': [ 23, 123 ],
@@ -2809,8 +2787,8 @@ describe( 'selectors', () => {
 								123: { clientId: 123, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								23: { attributes: {} },
-								123: { attributes: {} },
+								23: {},
+								123: {},
 							},
 							order: {
 								'': [ 23, 123 ],
@@ -3579,8 +3557,8 @@ describe( 'selectors', () => {
 								clientId2: { clientId: 'clientId2' },
 							},
 							attributesByClientId: {
-								clientId1: { attributes: {} },
-								clientId2: { attributes: {} },
+								clientId1: {},
+								clientId2: {},
 							},
 							order: {
 								'': [ 'clientId1' ],
@@ -3619,7 +3597,7 @@ describe( 'selectors', () => {
 								clientId1: { clientId: 'clientId1' },
 							},
 							attributesByClientId: {
-								clientId1: { attributes: {} },
+								clientId1: {},
 							},
 							order: {
 								'': [ 'clientId1' ],
@@ -3655,8 +3633,8 @@ describe( 'selectors', () => {
 								clientId2: { clientId: 'clientId2' },
 							},
 							attributesByClientId: {
-								clientId1: { attributes: {} },
-								clientId2: { attributes: {} },
+								clientId1: {},
+								clientId2: {},
 							},
 							order: {
 								'': [ 'clientId1' ],
@@ -3693,8 +3671,8 @@ describe( 'selectors', () => {
 								clientId2: { clientId: 'clientId2' },
 							},
 							attributesByClientId: {
-								clientId1: { attributes: {} },
-								clientId2: { attributes: {} },
+								clientId1: {},
+								clientId2: {},
 							},
 							order: {
 								'': [ 'clientId1', 'clientId2' ],
@@ -3731,8 +3709,8 @@ describe( 'selectors', () => {
 								clientId2: { clientId: 'clientId2' },
 							},
 							attributesByClientId: {
-								clientId1: { attributes: {} },
-								clientId2: { attributes: {} },
+								clientId1: {},
+								clientId2: {},
 							},
 							order: {
 								'': [ 'clientId1', 'clientId2' ],
@@ -3871,8 +3849,8 @@ describe( 'selectors', () => {
 								456: { clientId: 456, name: 'core/quote' },
 							},
 							attributesByClientId: {
-								123: { attributes: {} },
-								456: { attributes: {} },
+								123: {},
+								456: {},
 							},
 							order: {
 								'': [ 123, 456 ],
@@ -3897,7 +3875,7 @@ describe( 'selectors', () => {
 								123: { clientId: 123, name: 'core/image' },
 							},
 							attributesByClientId: {
-								123: { attributes: {} },
+								123: {},
 							},
 							order: {
 								'': [ 123 ],
@@ -3922,7 +3900,7 @@ describe( 'selectors', () => {
 								456: { clientId: 456, name: 'core/quote' },
 							},
 							attributesByClientId: {
-								456: { attributes: {} },
+								456: {},
 							},
 							order: {
 								'': [ 456 ],
@@ -3947,7 +3925,7 @@ describe( 'selectors', () => {
 								567: { clientId: 567, name: 'core-embed/youtube' },
 							},
 							attributesByClientId: {
-								567: { attributes: {} },
+								567: {},
 							},
 							order: {
 								'': [ 567 ],
@@ -3973,8 +3951,8 @@ describe( 'selectors', () => {
 								789: { clientId: 789, name: 'core/paragraph' },
 							},
 							attributesByClientId: {
-								456: { attributes: {} },
-								789: { attributes: {} },
+								456: {},
+								789: {},
 							},
 							order: {
 								'': [ 456, 789 ],
@@ -4029,7 +4007,7 @@ describe( 'selectors', () => {
 								[ block.clientId ]: omit( block, 'attributes' ),
 							},
 							attributesByClientId: {
-								[ block.clientId ]: { attributes: block.attributes },
+								[ block.clientId ]: block.attributes,
 							},
 							order: {
 								'': [ block.clientId ],
@@ -4060,7 +4038,7 @@ describe( 'selectors', () => {
 								[ block.clientId ]: omit( block, 'attributes' ),
 							},
 							attributesByClientId: {
-								[ block.clientId ]: { attributes: block.attributes },
+								[ block.clientId ]: block.attributes,
 							},
 							order: {
 								'': [ block.clientId ],
@@ -4090,7 +4068,7 @@ describe( 'selectors', () => {
 								[ unknownBlock.clientId ]: omit( unknownBlock, 'attributes' ),
 							},
 							attributesByClientId: {
-								[ unknownBlock.clientId ]: { attributes: unknownBlock.attributes },
+								[ unknownBlock.clientId ]: unknownBlock.attributes,
 							},
 							order: {
 								'': [ unknownBlock.clientId ],
@@ -4124,8 +4102,8 @@ describe( 'selectors', () => {
 								[ secondUnknown.clientId ]: omit( secondUnknown, 'attributes' ),
 							},
 							attributesByClientId: {
-								[ firstUnknown.clientId ]: { attributes: firstUnknown.attributes },
-								[ secondUnknown.clientId ]: { attributes: secondUnknown.attributes },
+								[ firstUnknown.clientId ]: firstUnknown.attributes,
+								[ secondUnknown.clientId ]: secondUnknown.attributes,
 							},
 							order: {
 								'': [ firstUnknown.clientId, secondUnknown.clientId ],
@@ -4153,7 +4131,7 @@ describe( 'selectors', () => {
 								[ defaultBlock.clientId ]: omit( defaultBlock, 'attributes' ),
 							},
 							attributesByClientId: {
-								[ defaultBlock.clientId ]: { attributes: defaultBlock.attributes },
+								[ defaultBlock.clientId ]: defaultBlock.attributes,
 							},
 							order: {
 								'': [ defaultBlock.clientId ],
@@ -4184,10 +4162,8 @@ describe( 'selectors', () => {
 							},
 							attributesByClientId: {
 								[ defaultBlock.clientId ]: {
-									attributes: {
-										...defaultBlock.attributes,
-										modified: true,
-									},
+									...defaultBlock.attributes,
+									modified: true,
 								},
 							},
 							order: {
@@ -4303,7 +4279,7 @@ describe( 'selectors', () => {
 								block1: { name: 'core/test-block-a' },
 							},
 							attributesByClientId: {
-								block1: { attributes: {} },
+								block1: {},
 							},
 						},
 					},
@@ -4323,7 +4299,7 @@ describe( 'selectors', () => {
 								block1: { name: 'core/test-block-b' },
 							},
 							attributesByClientId: {
-								block1: { attributes: {} },
+								block1: {},
 							},
 						},
 					},
@@ -4343,7 +4319,7 @@ describe( 'selectors', () => {
 								block1: { name: 'core/test-block-a' },
 							},
 							attributesByClientId: {
-								block1: { attributes: {} },
+								block1: {},
 							},
 						},
 					},
@@ -4367,7 +4343,7 @@ describe( 'selectors', () => {
 								block1: { name: 'core/test-block-a' },
 							},
 							attributesByClientId: {
-								block1: { attributes: {} },
+								block1: {},
 							},
 						},
 					},
@@ -4391,7 +4367,7 @@ describe( 'selectors', () => {
 								block1: { name: 'core/test-block-b' },
 							},
 							attributesByClientId: {
-								block1: { attributes: {} },
+								block1: {},
 							},
 						},
 					},
@@ -4417,7 +4393,7 @@ describe( 'selectors', () => {
 								block1: { name: 'core/test-block-a' },
 							},
 							attributesByClientId: {
-								block1: { attributes: {} },
+								block1: {},
 							},
 							order: {},
 						},
@@ -4490,8 +4466,8 @@ describe( 'selectors', () => {
 										ref: 1,
 									},
 								},
-								itselfBlock1: { attributes: {} },
-								itselfBlock2: { attributes: {} },
+								itselfBlock1: {},
+								itselfBlock2: {},
 							},
 							order: {
 								'': [ 'block1ref' ],
@@ -4554,10 +4530,10 @@ describe( 'selectors', () => {
 										ref: 2,
 									},
 								},
-								referredBlock1: { attributes: {} },
-								referredBlock2: { attributes: {} },
-								childReferredBlock2: { attributes: {} },
-								grandchildReferredBlock2: { attributes: {} },
+								referredBlock1: {},
+								referredBlock2: {},
+								childReferredBlock2: {},
+								grandchildReferredBlock2: {},
 							},
 							order: {
 								'': [ 'block2ref' ],
@@ -4610,8 +4586,8 @@ describe( 'selectors', () => {
 								block2: { name: 'core/test-block-a' },
 							},
 							attributesByClientId: {
-								block1: { attributes: {} },
-								block2: { attributes: {} },
+								block1: {},
+								block2: {},
 							},
 							order: {},
 						},
@@ -4657,10 +4633,10 @@ describe( 'selectors', () => {
 								block4: { name: 'core/test-block-a' },
 							},
 							attributesByClientId: {
-								block1: { attributes: {} },
-								block2: { attributes: {} },
-								block3: { attributes: {} },
-								block4: { attributes: {} },
+								block1: {},
+								block2: {},
+								block3: {},
+								block4: {},
 							},
 							order: {
 								'': [ 'block3', 'block4' ],

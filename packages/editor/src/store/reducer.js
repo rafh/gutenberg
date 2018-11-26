@@ -132,7 +132,7 @@ function getFlattenedBlocksWithoutAttributes( blocks ) {
  * @return {Object} Flattened block attributes object.
  */
 function getFlattenedBlockAttributes( blocks ) {
-	return flattenBlocks( blocks, ( block ) => ( { attributes: block.attributes } ) );
+	return flattenBlocks( blocks, ( block ) => block.attributes );
 }
 
 /**
@@ -287,7 +287,7 @@ const withBlockReset = ( reducer ) => ( state, action ) => {
 				...getFlattenedBlocksWithoutAttributes( action.blocks ),
 			},
 			attributesByClientId: {
-				...omit( state.byClientId, visibleClientIds ),
+				...omit( state.attributesByClientId, visibleClientIds ),
 				...getFlattenedBlockAttributes( action.blocks ),
 			},
 			order: {
@@ -325,17 +325,17 @@ const withSaveReusableBlock = ( reducer ) => ( state, action ) => {
 
 		Object.keys( state.byClientId ).forEach( ( blockId ) => {
 			const block = { ...state.byClientId[ blockId ] };
-			const attributes = { ...state.attributesByClientId[ blockId ] };
+			let attributes = { ...state.attributesByClientId[ blockId ] };
 
-			newState.byClientId[ blockId ] = block;
-			newState.attributesByClientId[ blockId ] = attributes;
-
-			if ( block.name === 'core/block' && attributes && attributes.attributes.ref === id ) {
-				attributes.attributes = {
-					...attributes.attributes,
+			if ( block.name === 'core/block' && attributes && attributes.ref === id ) {
+				attributes = {
+					...attributes,
 					ref: updatedId,
 				};
 			}
+
+			newState.byClientId[ blockId ] = block;
+			newState.attributesByClientId[ blockId ] = attributes;
 		} );
 	}
 
@@ -504,7 +504,7 @@ export const editor = flow( [
 						...state,
 						[ action.clientId ]: {
 							...state[ action.clientId ],
-							attributes: { ...action.updates.attributes },
+							...action.updates.attributes,
 						},
 					};
 
@@ -517,25 +517,23 @@ export const editor = flow( [
 					// Consider as updates only changed values
 					const nextAttributes = reduce( action.attributes, ( result, value, key ) => {
 						if ( value !== result[ key ] ) {
-							result = getMutateSafeObject( state[ action.clientId ].attributes, result );
+							result = getMutateSafeObject( state[ action.clientId ], result );
 							result[ key ] = value;
 						}
 
 						return result;
-					}, state[ action.clientId ].attributes );
+					}, state[ action.clientId ] );
 
 					// Skip update if nothing has been changed. The reference will
 					// match the original block if `reduce` had no changed values.
-					if ( nextAttributes === state[ action.clientId ].attributes ) {
+					if ( nextAttributes === state[ action.clientId ] ) {
 						return state;
 					}
 
 					// Otherwise replace attributes in state
 					return {
 						...state,
-						[ action.clientId ]: {
-							attributes: nextAttributes,
-						},
+						[ action.clientId ]: nextAttributes,
 					};
 
 				case 'INSERT_BLOCKS':

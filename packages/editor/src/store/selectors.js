@@ -631,7 +631,7 @@ export const getBlock = createSelector(
 			return null;
 		}
 
-		let { attributes } = state.editor.present.blocks.attributesByClientId[ clientId ];
+		let attributes = state.editor.present.blocks.attributesByClientId[ clientId ];
 
 		// Inject custom source attribute values.
 		//
