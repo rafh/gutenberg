@@ -456,7 +456,7 @@ export const editor = flow( [
 						...state,
 						[ action.clientId ]: {
 							...state[ action.clientId ],
-							...omit( action.updates, 'attributes' ),
+							...changes,
 						},
 					};
 
