@@ -4,7 +4,6 @@
 import {
 	castArray,
 	flatMap,
-	flatten,
 	find,
 	first,
 	get,
@@ -701,9 +700,7 @@ export const getBlocks = createSelector(
 			];
 		}
 		return [
-			state.editor.present.blocks.order,
-			state.editor.present.blocks.byClientId[ rootClientId ],
-			state.editor.present.blocks.attributesByClientId[ rootClientId ],
+			getBlock.getDependants( state, rootClientId ),
 		];
 	}
 );
@@ -782,11 +779,11 @@ const mapClientIds = ( clientIds, fn ) => map(
  */
 export const getBlocksByClientId = createSelector(
 	( state, clientIds ) => mapClientIds( clientIds, ( clientId ) => getBlock( state, clientId ) ),
-	( state, clientIds ) => [
+	( state ) => [
 		state.editor.present.edits.meta,
 		state.initialEdits.meta,
 		state.currentPost.meta,
-		...mapClientIds( clientIds, ( clientId ) => getBlock( state, clientId ) ),
+		state.editor.present.blocks,
 	]
 );
 
@@ -1106,7 +1103,7 @@ export const getMultiSelectedBlocks = createSelector(
 	},
 	( state ) => [
 		...getMultiSelectedBlockClientIds.getDependants( state ),
-		...flatten( mapMultiSelectedBlockClientIds( state, ( clientId ) => getBlock.getDependants( state, clientId ) ) ),
+		state.editor.present.blocks,
 		state.editor.present.edits.meta,
 		state.initialEdits.meta,
 		state.currentPost.meta,
