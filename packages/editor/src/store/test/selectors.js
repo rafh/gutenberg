@@ -4028,7 +4028,7 @@ describe( 'selectors', () => {
 							byClientId: {
 								[ block.clientId ]: omit( block, 'attributes' ),
 							},
-							byClientId: {
+							attributesByClientId: {
 								[ block.clientId ]: { attributes: block.attributes },
 							},
 							order: {
