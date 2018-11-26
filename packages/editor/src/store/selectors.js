@@ -763,11 +763,6 @@ export const getGlobalBlockCount = createSelector(
 	]
 );
 
-const mapClientIds = ( clientIds, fn ) => map(
-	castArray( clientIds ),
-	( clientId ) => fn( clientId )
-);
-
 /**
  * Given an array of block client IDs, returns the corresponding array of block
  * objects.
@@ -778,7 +773,10 @@ const mapClientIds = ( clientIds, fn ) => map(
  * @return {WPBlock[]} Block objects.
  */
 export const getBlocksByClientId = createSelector(
-	( state, clientIds ) => mapClientIds( clientIds, ( clientId ) => getBlock( state, clientId ) ),
+	( state, clientIds ) => map(
+		castArray( clientIds ),
+		( clientId ) => getBlock( state, clientId )
+	),
 	( state ) => [
 		state.editor.present.edits.meta,
 		state.initialEdits.meta,
