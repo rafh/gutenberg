@@ -87,38 +87,39 @@ function mapBlockOrder( blocks, rootClientId = '' ) {
 }
 
 /**
- * Given an array of blocks, returns an object containing all blocks, recursing
- * into inner blocks. Keys correspond to the block client ID, the value of
- * which is the block object.
+ * Helper method to iterate through all blocks, recursing into inner blocks,
+ * applying a transformation function to each one.
+ * Returns a flattened object with the transformed blocks.
  *
- * @param {Array} blocks Blocks to flatten.
+ * @param {*} blocks Blocks to flatten.
+ * @param {*} transform Transforming function to be applied to each block.
  *
- * @return {Object} Flattened blocks object.
+ * @return {Object} Flattened object.
  */
-function getFlattenedBlocks( blocks ) {
-	const flattenedBlocks = {};
+function flattenBlocks( blocks, transform ) {
+	const result = {};
 
 	const stack = [ ...blocks ];
 	while ( stack.length ) {
-		// `innerBlocks` is redundant data which can fall out of sync, since
-		// this is reflected in `blocks.order`, so exclude from appended block.
 		const { innerBlocks, ...block } = stack.shift();
-
 		stack.push( ...innerBlocks );
-
-		flattenedBlocks[ block.clientId ] = block;
+		result[ block.clientId ] = transform( block );
 	}
 
-	return flattenedBlocks;
+	return result;
 }
 
+/**
+ * Given an array of blocks, returns an object containing all blocks, without
+ * attributes, recursing into inner blocks. Keys correspond to the block client
+ * ID, the value of which is the attributes object.
+ *
+ * @param {Array} blocks Blocks to flatten.
+ *
+ * @return {Object} Flattened block attributes object.
+ */
 function getFlattenedBlocksWithoutAttributes( blocks ) {
-	const flattenedBlocks = getFlattenedBlocks( blocks );
-
-	return Object.keys( flattenedBlocks ).reduce( ( result, blockId ) => ( {
-		...result,
-		[ blockId ]: omit( flattenedBlocks[ blockId ], 'attributes' ),
-	} ), {} );
+	return flattenBlocks( blocks, ( block ) => omit( block, 'attributes' ) );
 }
 
 /**
@@ -131,12 +132,7 @@ function getFlattenedBlocksWithoutAttributes( blocks ) {
  * @return {Object} Flattened block attributes object.
  */
 function getFlattenedBlockAttributes( blocks ) {
-	const flattenedBlocks = getFlattenedBlocks( blocks );
-
-	return Object.keys( flattenedBlocks ).reduce( ( result, blockId ) => ( {
-		...result,
-		[ blockId ]: { attributes: flattenedBlocks[ blockId ].attributes },
-	} ), {} );
+	return flattenBlocks( blocks, ( block ) => ( { attributes: block.attributes } ) );
 }
 
 /**
