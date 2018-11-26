@@ -450,6 +450,12 @@ export const editor = flow( [
 						return state;
 					}
 
+					// Do nothing if only attributes change.
+					const changes = omit( action.updates, 'attributes' );
+					if ( keys( changes ).length === 0 ) {
+						return state;
+					}
+
 					return {
 						...state,
 						[ action.clientId ]: {
@@ -493,8 +499,8 @@ export const editor = flow( [
 					};
 
 				case 'UPDATE_BLOCK':
-					// Ignore updates if block isn't known
-					if ( ! state[ action.clientId ] ) {
+					// Ignore updates if block isn't known or there are no attribute changes.
+					if ( ! state[ action.clientId ] || ! action.updates.attributes ) {
 						return state;
 					}
 

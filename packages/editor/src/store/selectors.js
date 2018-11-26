@@ -440,7 +440,7 @@ export function isEditedPostSaveable( state ) {
  * @return {boolean} Whether post has content.
  */
 export function isEditedPostEmpty( state ) {
-	const blocks = getBlocksForSerializationWithoutAttributes( state );
+	const blocks = getBlockNamesForSerialization( state );
 
 	// While the condition of truthy content string is sufficient to determine
 	// emptiness, testing saveable blocks length is a trivial operation. Since
@@ -600,7 +600,7 @@ export const getBlockDependantsCacheBust = createSelector(
  * @return {*} A value whose reference will change only when inner blocks of
  *             the given block client ID change.
  */
-export const getBlockDependantsCacheBustWithoutAttributes = createSelector(
+const getBlockDependantsCacheBustWithoutAttributes = createSelector(
 	() => [],
 	( state, clientId ) => map(
 		getBlockOrder( state, clientId ),
@@ -702,7 +702,7 @@ export const getBlock = createSelector(
  *
  * @return {Object} Parsed block object.
  */
-export const getBlockWithoutAttributes = createSelector(
+const getBlockWithoutAttributes = createSelector(
 	( state, clientId ) => {
 		const block = state.editor.present.blocks.byClientId[ clientId ];
 		if ( ! block ) {
@@ -775,7 +775,7 @@ export const getBlocks = createSelector(
  *
  * @return {Object[]} Post blocks.
  */
-export const getBlocksWithoutAttributes = createSelector(
+const getBlocksWithoutAttributes = createSelector(
 	( state, rootClientId ) => {
 		return map(
 			getBlockOrder( state, rootClientId ),
@@ -879,7 +879,7 @@ export const getBlocksByClientId = createSelector(
  *
  * @return {WPBlock[]} Block objects.
  */
-export const getBlocksByClientIdWithoutAttributes = createSelector(
+const getBlocksByClientIdWithoutAttributes = createSelector(
 	( state, clientIds ) => mapClientIds( clientIds, ( clientId ) => getBlockWithoutAttributes( state, clientId ) ),
 	( state, clientIds ) => [
 		state.editor.present.edits.meta,
@@ -1750,7 +1750,7 @@ export function getBlocksForSerialization( state ) {
  *
  * @return {WPBlock[]} Filtered set of blocks for save.
  */
-export function getBlocksForSerializationWithoutAttributes( state ) {
+function getBlockNamesForSerialization( state ) {
 	const blocksWithoutAttributes = getBlocksWithoutAttributes( state );
 
 	// A single unmodified default block is assumed to be equivalent to an
