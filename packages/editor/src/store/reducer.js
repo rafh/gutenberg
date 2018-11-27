@@ -13,6 +13,7 @@ import {
 	omitBy,
 	keys,
 	isEqual,
+	isEmpty,
 	overSome,
 	get,
 } from 'lodash';
@@ -311,8 +312,6 @@ const withBlockReset = ( reducer ) => ( state, action ) => {
  * @return {Function} Enhanced reducer function.
  */
 const withSaveReusableBlock = ( reducer ) => ( state, action ) => {
-	let newState = state;
-
 	if ( state && action.type === 'SAVE_REUSABLE_BLOCK_SUCCESS' ) {
 		const { id, updatedId } = action;
 
@@ -321,25 +320,22 @@ const withSaveReusableBlock = ( reducer ) => ( state, action ) => {
 			return state;
 		}
 
-		newState = { ...state };
-		newState.attributesByClientId = {};
+		state = { ...state };
 
-		Object.keys( state.byClientId ).forEach( ( blockId ) => {
-			const block = newState.byClientId[ blockId ];
-			let attributes = { ...state.attributesByClientId[ blockId ] };
-
-			if ( block.name === 'core/block' && attributes && attributes.ref === id ) {
-				attributes = {
+		state.attributesByClientId = mapValues( state.attributesByClientId, ( attributes, clientId ) => {
+			const { name } = state.byClientId[ clientId ];
+			if ( name === 'core/block' && attributes.ref === id ) {
+				return {
 					...attributes,
 					ref: updatedId,
 				};
 			}
 
-			newState.attributesByClientId[ blockId ] = attributes;
+			return attributes;
 		} );
 	}
 
-	return reducer( newState, action );
+	return reducer( state, action );
 };
 
 /**
@@ -448,7 +444,7 @@ export const editor = flow( [
 
 					// Do nothing if only attributes change.
 					const changes = omit( action.updates, 'attributes' );
-					if ( keys( changes ).length === 0 ) {
+					if ( isEmpty( changes ) ) {
 						return state;
 					}
 
